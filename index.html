@@ -384,7 +384,7 @@
                 message = '金钟罩,铁布衫,都不如天神来护驾！';
             } else if (results.filter(r => r === '高级天神护体（宠）').length >= 2) {
                 message = '皮糙肉厚才能保护主人！';
-            } else if (results.filter(r => r === '凌波微步（人）').length >= 2) {
+            } else if (results.filter(r => r === '凌波微步（人）').length = 2) {
                 message = '双倍价钱拉5000这真的值得吗~';
             } else if (results.filter(r => r === '凌波微步（人）').length > 2) {
                 message = '真正的7500诞生了！！！';
@@ -412,8 +412,6 @@
                 message = '看好了，我的蓝猫一击必杀！';
             } else if (results.includes('高级击其要害（人）') && results.includes('击其要害（人）')) {
                 message = '天下武功，唯我快、准、狠！';
-            } else if (results.includes('高级清明术（宠）') && results.includes('清明术（宠）')) {
-                message = '无极便是道！';
             } else {
                 message = '好像出货了，已自动为你记录';
             }
@@ -421,7 +419,7 @@
             overlay.classList.add('active');
             setTimeout(() => {
                 overlay.classList.remove('active');
-            }, 800);
+            }, 1000);
         }
 
         // 记录按钮点击事件
