@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>骑宠天赋洗练模拟器</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-image: url('https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E7%BB%BC%E5%90%88%E8%83%8C%E6%99%AF.png?raw=true');
+            background-repeat: repeat;
+            background-size: auto;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #ca7137;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .wash-result, .record-area {
+            border: 2px solid black;
+            padding: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            width: 60%;
+        }
+
+        .talent-display, .talent-record {
+            width: 90px;
+            height: 110px;
+            border: 1px solid gray;
+            background-color: #d4b562;
+            overflow: hidden;
+        }
+
+        .talent-display img, .talent-record img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #ca7137;
+            color: white;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            margin: 0 10px;
+            transition: transform 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .item-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .item-count, .adv-item-count {
+            margin: 0 20px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .overlay-text {
+            color: white;
+            font-size: 24px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>骑宠天赋生成系统</h1>
+        <div class="button-container">
+            <button class="wash-btn">洗练</button>
+            <button class="adv-wash-btn">高级洗练</button>
+            <button class="record-btn">记录</button>
+        </div>
+        <div class="wash-result">
+            <div class="talent-display"></div>
+            <div class="talent-display"></div>
+            <div class="talent-display"></div>
+        </div>
+        <div class="record-area">
+            <div class="talent-record"></div>
+            <div class="talent-record"></div>
+            <div class="talent-record"></div>
+        </div>
+        <div class="item-display">
+            <div class="item-count">神兽丹: <span id="item-count">1000</span></div>
+            <div class="adv-item-count">高级神兽丹: <span id="adv-item-count">1000</span></div>
+            <button class="reset-btn">复位</button>
+        </div>
+    </div>
+
+    <div class="overlay">
+        <div class="overlay-text"></div>
+    </div>
+
+    <script>
+        // 普通天赋
+        const talents = [
+            {
+                name: '凌波微步（人）',
+                imgUrl: 'https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E5%87%8C%E6%B3%A2%E5%BE%AE%E6%AD%A5%EF%BC%88%E4%BA%BA%EF%BC%89.png?raw=true'
+            },
+            {
+                name: '凌波微步（宠）',
+                imgUrl: 'https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E5%87%8C%E6%B3%A2%E5%BE%AE%E6%AD%A5%EF%BC%88%E5%AE%A0%EF%BC%89.png?raw=true'
+            },
+    {
+        "name": "击其要害（人）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E5%87%BB%E5%85%B6%E8%A6%81%E5%AE%B3%EF%BC%88%E4%BA%BA%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "击其要害（宠）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E5%87%BB%E5%85%B6%E8%A6%81%E5%AE%B3%EF%BC%88%E5%AE%A0%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "天神护体（人）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E5%A4%A9%E7%A5%9E%E6%8A%A4%E4%BD%93%EF%BC%88%E4%BA%BA%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "天神护体（宠）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E5%A4%A9%E7%A5%9E%E6%8A%A4%E4%BD%93%EF%BC%88%E5%AE%A0%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "斗转星移（人）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E6%96%97%E8%BD%AC%E6%98%9F%E7%A7%BB%EF%BC%88%E4%BA%BA%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "斗转星移（宠）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E6%96%97%E8%BD%AC%E6%98%9F%E7%A7%BB%EF%BC%88%E5%AE%A0%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "清明术（人）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E6%B8%85%E6%98%8E%E6%9C%AF%EF%BC%88%E4%BA%BA%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "清明术（宠）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E6%B8%85%E6%98%8E%E6%9C%AF%EF%BC%88%E5%AE%A0%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "百步穿杨（人）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E7%99%BE%E6%AD%A5%E7%A9%BF%E6%9D%A8%EF%BC%88%E4%BA%BA%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "百步穿杨（宠）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E7%99%BE%E6%AD%A5%E7%A9%BF%E6%9D%A8%EF%BC%88%E5%AE%A0%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "萃金诀（人）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E7%B2%B9%E9%87%91%E8%AF%80%EF%BC%88%E4%BA%BA%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "萃金诀（宠）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E8%90%83%E9%87%91%E8%AF%80%EF%BC%88%E5%AE%A0%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "赤血（人）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E8%B5%A4%E8%A1%80%EF%BC%88%E4%BA%BA%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "赤血（宠）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E8%B5%A4%E8%A1%80%EF%BC%88%E5%AE%A0%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "金身不坏（人）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E9%87%91%E8%BA%AB%E4%B8%8D%E5%9D%8F%EF%BC%88%E4%BA%BA%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "金身不坏（宠）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E9%87%91%E8%BA%AB%E4%B8%8D%E5%9D%8F%EF%BC%88%E5%AE%A0%EF%BC%89.png?raw=true"
+    }
+            // 其他普通天赋...
+        ];
+
+        // 高级天赋
+        const advTalents = [
+            {
+                name: '高级击其要害（人）',
+                imgUrl: 'https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E9%AB%98%E7%BA%A7%E5%87%BB%E5%85%B6%E8%A6%81%E5%AE%B3%EF%BC%88%E4%BA%BA%EF%BC%89.png?raw=true'
+            },
+            {  
+                name: '高级击其要害（宠）',
+                imgUrl: 'https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E9%AB%98%E7%BA%A7%E5%87%BB%E5%85%B6%E8%A6%81%E5%AE%B3%EF%BC%88%E5%AE%A0%EF%BC%89.png?raw=true'
+            },
+    {
+        "name": "高级击其要害（人）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E9%AB%98%E7%BA%A7%E5%87%BB%E5%85%B6%E8%A6%81%E5%AE%B3%EF%BC%88%E4%BA%BA%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "高级击其要害（宠）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E9%AB%98%E7%BA%A7%E5%87%BB%E5%85%B6%E8%A6%81%E5%AE%B3%EF%BC%88%E5%AE%A0%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "高级天神护体（人）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E9%AB%98%E7%BA%A7%E5%A4%A9%E7%A5%9E%E6%8A%A4%E4%BD%93%EF%BC%88%E4%BA%BA%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "高级天神护体（宠）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E9%AB%98%E7%BA%A7%E5%A4%A9%E7%A5%9E%E6%8A%A4%E4%BD%93%EF%BC%88%E5%AE%A0%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "高级斗转星移（人）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E9%AB%98%E7%BA%A7%E6%96%97%E8%BD%AC%E6%98%9F%E7%A7%BB%EF%BC%88%E4%BA%BA%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "高级斗转星移（宠）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E9%AB%98%E7%BA%A7%E6%96%97%E8%BD%AC%E6%98%9F%E7%A7%BB%EF%BC%88%E5%AE%A0%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "高级清明术（人）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E9%AB%98%E7%BA%A7%E6%B8%85%E6%98%8E%E6%9C%AF%EF%BC%88%E4%BA%BA%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "高级清明术（宠）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E9%AB%98%E7%BA%A7%E6%B8%85%E6%98%8E%E6%9C%AF%EF%BC%88%E5%AE%A0%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "高级百步穿杨（人）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E9%AB%98%E7%BA%A7%E7%99%BE%E6%AD%A5%E7%A9%BF%E6%9D%A8%EF%BC%88%E4%BA%BA%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "高级百步穿杨（宠）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E9%AB%98%E7%BA%A7%E7%99%BE%E6%AD%A5%E7%A9%BF%E6%9D%A8%EF%BC%88%E5%AE%A0%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "高级萃金诀（人）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E9%AB%98%E7%BA%A7%E8%90%83%E9%87%91%E8%AF%80%EF%BC%88%E4%BA%BA%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "高级萃金诀（宠）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E9%AB%98%E7%BA%A7%E8%90%83%E9%87%91%E8%AF%80%EF%BC%88%E5%AE%A0%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "高级赤血（人）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E9%AB%98%E7%BA%A7%E8%B5%A4%E8%A1%80%EF%BC%88%E4%BA%BA%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "高级赤血（宠）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E9%AB%98%E7%BA%A7%E8%B5%A4%E8%A1%80%EF%BC%88%E5%AE%A0%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "高级金身不坏（人）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E9%AB%98%E7%BA%A7%E9%87%91%E8%BA%AB%E4%B8%8D%E5%9D%8F%EF%BC%88%E4%BA%BA%EF%BC%89.png?raw=true"
+    },
+    {
+        "name": "高级金身不坏（宠）",
+        "imgUrl": "https://github.com/heyturbo/tianfu/blob/heyturbo-patch-tianfu/%E9%AB%98%E7%BA%A7%E9%87%91%E8%BA%AB%E4%B8%8D%E5%9D%8F%EF%BC%88%E5%AE%A0%EF%BC%89.png?raw=true"
+    }
+            // 其他高级天赋...
+        ];
+
+        let itemCount = 1000;
+        let advItemCount = 1000;
+        const itemCountDisplay = document.getElementById('item-count');
+        const advItemCountDisplay = document.getElementById('adv-item-count');
+        const talentDisplays = document.querySelectorAll('.talent-display');
+        const talentRecords = document.querySelectorAll('.talent-record');
+        const overlay = document.querySelector('.overlay');
+        const overlayText = document.querySelector('.overlay-text');
+
+        // 洗练按钮点击事件
+        document.querySelector('.wash-btn').addEventListener('click', function() {
+            if (itemCount < 1) {
+                alert('您已耗尽所有洗练道具,请尝试复位');
+                return;
+            }
+            itemCount--;
+            itemCountDisplay.textContent = itemCount;
+            wash(0.95, 0.05, false);
+        });
+
+        // 高级洗练按钮点击事件  
+        document.querySelector('.adv-wash-btn').addEventListener('click', function() {
+            if (advItemCount < 1) {
+                alert('您已耗尽所有洗练道具,请尝试复位');
+                return;
+            }
+            advItemCount--;
+            advItemCountDisplay.textContent = advItemCount;
+            wash(0.95, 0.05, true);
+        });
+
+        // 洗练函数
+        function wash(talentProb, advTalentProb, isAdvanced) {
+            const results = [];
+            talentDisplays.forEach((display, index) => {
+                let rand = Math.random();
+                if (isAdvanced && index === 0) {
+                    let advIndex = Math.floor(Math.random() * advTalents.length);
+                    display.innerHTML = `<img src="${advTalents[advIndex].imgUrl}" alt="${advTalents[advIndex].name}">`;
+                    results.push(advTalents[advIndex].name);
+                } else if (rand < talentProb) {
+                    let index = Math.floor(Math.random() * talents.length);
+                    display.innerHTML = `<img src="${talents[index].imgUrl}" alt="${talents[index].name}">`;
+                    results.push(talents[index].name);
+                } else {
+                    let index = Math.floor(Math.random() * advTalents.length);
+                    display.innerHTML = `<img src="${advTalents[index].imgUrl}" alt="${advTalents[index].name}">`;
+                    results.push(advTalents[index].name);
+                }
+            });
+            const hasDuplicates = checkDuplicates(results);
+            if (hasDuplicates) {
+                recordResults();
+                showOverlay(results);
+            }
+        }
+
+        // 检查是否有重复天赋
+        function checkDuplicates(results) {
+            const uniqueResults = new Set(results);
+            return uniqueResults.size < results.length;
+        }
+
+        // 记录结果
+        function recordResults() {
+            talentRecords.forEach((record, index) => {
+                record.innerHTML = talentDisplays[index].innerHTML;
+            });
+        }
+
+        // 显示全屏提示
+        function showOverlay(results) {
+            let message = '';
+            if (results.filter(r => r === '高级凌波微步（人）').length >= 2) {
+                message = '你获得了富可敌国的宝藏！';
+            } else if (results.filter(r => r === '高级凌波微步（宠）').length >= 2) {
+                message = '你的宠物即刻化身闪电侠';
+            } else if (results.filter(r => r === '高级萃金诀（人）').length >= 2) {
+                message = '你的力量无人能敌';
+            } else if (results.filter(r => r === '高级萃金诀（宠）').length >= 2) {
+                message = '你在养金刚？';
+            } else if (results.filter(r => r === '高级清明术（人）').length >= 2) {
+                message = '魔法！魔法！伟大的魔法！';
+            } else if (results.filter(r => r === '高级清明术（宠）').length >= 2) {
+                message = '又一个聪明宝宝诞生了！';
+            } else if (results.filter(r => r === '高级天神护体（人）').length >= 2) {
+                message = '金钟罩,铁布衫,都不如天神来护驾！';
+            } else if (results.filter(r => r === '高级天神护体（宠）').length >= 2) {
+                message = '皮糙肉厚才能保护主人！';
+            } else if (results.filter(r => r === '凌波微步（人）').length >= 2) {
+                message = '不失为一种好运~';
+            } else if (results.filter(r => r === '凌波微步（宠）').length >= 2) {
+                message = '3200块拉满换宠物5000速真的值得吗';
+            } else if (results.includes('高级凌波微步（人）') && results.includes('凌波微步（人）')) {
+                message = '如果你在一个大反内洗出来,你就是赢家';
+            } else if (results.includes('高级凌波微步（宠）') && results.includes('凌波微步（宠）')) {
+                message = '这样的天赋最适合给白虎！';
+            } else if (results.includes('高级萃金诀（人）') && results.includes('萃金诀（人）')) {
+                message = '不做最暴力,但要更暴力！';
+            } else if (results.includes('高级清明术（人）') && results.includes('清明术（人）')) {
+                message = '哈利波特骑着扫帚到处飞~';
+            } else if (results.includes('高级萃金诀（宠）') && results.includes('萃金诀（宠）')) {
+                message = '设想一下,一个天赋拉满的20雷蓝猫站在你面前…';
+            } else if (results.includes('高级清明术（宠）') && results.includes('清明术（宠）')) {
+                message = '无极便是道！';
+            } else {
+                message = '好像出货了，已自动为你记录';
+            }
+            overlayText.textContent = message;
+            overlay.classList.add('active');
+            setTimeout(() => {
+                overlay.classList.remove('active');
+            }, 800);
+        }
+
+        // 记录按钮点击事件
+        document.querySelector('.record-btn').addEventListener('click', recordResults);
+
+        // 复位按钮点击事件
+        document.querySelector('.reset-btn').addEventListener('click', function() {
+            itemCount = 1000;
+            advItemCount = 1000;
+            itemCountDisplay.textContent = itemCount;
+            advItemCountDisplay.textContent = advItemCount;
+            talentDisplays.forEach(display => {
+                display.innerHTML = '';
+            });
+            talentRecords.forEach(record => {
+                record.innerHTML = '';
+            });
+        });
+
+        // 预加载图片函数
+        function preloadImages(urls) {
+            urls.forEach(url => {
+                const img = new Image();
+                img.src = url; 
+            });
+        }
+
+        // 调用预加载函数
+        const allImgUrls = talents.concat(advTalents).map(talent => talent.imgUrl);
+        preloadImages(allImgUrls);
+    </script>
+</body>
+</html>
