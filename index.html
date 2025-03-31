@@ -1,504 +1,961 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>骑宠天赋洗练模拟器</title>
+    <title>Data Insights Blog | Yelp Analysis Project</title>
     <style>
-        body {
+        :root {
+            --primary-color: #4285f4;
+            --secondary-color: #34a853;
+            --dark-color: #333;
+            --light-color: #f4f4f4;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --link-hover: #1a73e8;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            background-image: url('https://pic.imgdb.cn/item/663885620ea9cb14033e4f6e.png');
-            background-repeat: repeat;
-            background-size: auto;
         }
-
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        a:hover {
+            color: var(--link-hover);
+            text-decoration: underline;
+        }
+        
+        ul {
+            list-style: none;
+        }
+        
+        img {
+            max-width: 100%;
+        }
+        
         .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
-
-        h1 {
-            color: #ca7137;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        .button-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .wash-result, .record-area {
-            border: 2px solid black;
-            padding: 5px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-around;
-            width: 60%;
-        }
-
-        .talent-display, .talent-record {
-            width: 90px;
-            height: 110px;
-            border: 1px solid gray;
-            background-color: #d4b562;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
             overflow: hidden;
         }
-
-        .talent-display img, .talent-record img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        button {
-            padding: 10px 20px;
-            border-radius: 5px;
-            background-color: #ca7137;
-            color: white;
-            border: none;
-            cursor: pointer;
-            outline: none;
-            margin: 0 10px;
-            transition: transform 0.2s;
-        }
-
-        button:active {
-            transform: scale(0.95);
-        }
-
-        .item-display {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 20px;
-        }
-
-        .item-count, .adv-item-count {
-            margin: 0 20px;
-        }
-
-        .overlay {
-            position: fixed;
+        
+        header {
+            background-color: white;
+            box-shadow: var(--box-shadow);
+            position: sticky;
             top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 100;
+        }
+        
+        .header-content {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            z-index: 9999;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s;
+            padding: 1rem 0;
         }
-
-        .overlay.active {
-            opacity: 1;
-            pointer-events: all;
+        
+        .logo h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
         }
-
-        .overlay-text {
+        
+        .logo span {
+            font-size: 1rem;
+            color: var(--dark-color);
+            font-weight: normal;
+        }
+        
+        .nav-menu {
+            display: flex;
+        }
+        
+        .nav-menu li {
+            margin-left: 1.5rem;
+        }
+        
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #3b5998 100%);
             color: white;
-            font-size: 24px;
+            padding: 4rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100%;
+        }
+        
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            max-width: 700px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.7rem 2rem;
+            background-color: white;
+            color: var(--primary-color);
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+        }
+        
+        main {
+            padding: 2rem 0;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 7fr 3fr;
+            gap: 2rem;
+        }
+        
+        .blog-content h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark-color);
+        }
+        
+        .blog-content h3 {
+            font-size: 1.5rem;
+            margin: 1.5rem 0 1rem;
+            color: var(--dark-color);
+        }
+        
+        .blog-content p {
+            margin-bottom: 1.5rem;
+        }
+        
+        .blog-post {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .author-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .author-info img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 1rem;
+        }
+        
+        .author-text span {
+            display: block;
+        }
+        
+        .author-name {
+            font-weight: bold;
+        }
+        
+        .post-date {
+            color: #777;
+            font-size: 0.9rem;
+        }
+        
+        .project-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-img {
+            height: 200px;
+            background-color: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #777;
+        }
+        
+        .card-content {
+            padding: 1.5rem;
+        }
+        
+        .card-title {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-text {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+        
+        .card-link {
+            display: inline-block;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .sidebar {
+            position: sticky;
+            top: 100px;
+        }
+        
+        .sidebar-widget {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .sidebar-widget h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .category-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .category-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .tag-cloud {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            display: inline-block;
+            background-color: #eee;
+            color: #666;
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 0 0.5rem 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .tag:hover {
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .project-nav {
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        
+        .project-nav-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+        }
+        
+        .project-nav-list {
+            padding: 1rem;
+        }
+        
+        .project-nav-list .section-title {
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+        
+        .project-nav-list .section-items {
+            padding-left: 1rem;
+        }
+        
+        .project-nav-list .section-items li {
+            padding: 0.3rem 0;
+        }
+        
+        .section-highlight {
+            background-color: #f0f7ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .data-viz-placeholder {
+            background-color: #eee;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: #777;
+        }
+        
+        .code-block {
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+        
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f5f5f5;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 2rem 0;
             text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        
+        .footer-section {
+            flex: 1;
+            min-width: 300px;
+            margin-bottom: 1rem;
+            padding: 0 1rem;
+        }
+        
+        .footer-bottom {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 1rem 0;
+            margin-top: 1rem;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            
+            .logo {
+                margin-bottom: 1rem;
+            }
+            
+            .nav-menu {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav-menu li {
+                margin: 0.5rem 0;
+            }
+            
+            .hero {
+                padding: 2rem 0;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .sidebar {
+                position: static;
+            }
+        }
+
+        /* Dark mode toggle styles */
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+        }
+        
+        .theme-switch {
+            display: inline-block;
+            height: 24px;
+            position: relative;
+            width: 50px;
+        }
+        
+        .theme-switch input {
+            display: none;
+        }
+        
+        .slider {
+            background-color: #ccc;
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            background-color: white;
+            bottom: 4px;
+            content: "";
+            height: 16px;
+            left: 4px;
+            position: absolute;
+            transition: .4s;
+            width: 16px;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .theme-switch-wrapper em {
+            margin-left: 10px;
+            font-size: 0.9rem;
+        }
+
+        /* TOC navigation highlighting */
+        .active-section {
+            font-weight: bold;
+            color: var(--primary-color);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>骑宠天赋洗练模拟器</h1>
-        <div class="button-container">
-            <button class="wash-btn">普通洗练</button>
-            <button class="adv-wash-btn">高级洗练</button>
-            <button class="record-btn">记录结果</button>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>Data Insights Blog</h1>
+                    <span>Advanced Analysis & Data Science Projects</span>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#overview">Project Overview</a></li>
+                    <li><a href="#methodology">Methodology</a></li>
+                    <li><a href="#findings">Key Findings</a></li>
+                    <li><a href="#about">About Me</a></li>
+                    <li>
+                        <div class="theme-switch-wrapper">
+                            <label class="theme-switch" for="checkbox">
+                                <input type="checkbox" id="checkbox" />
+                                <div class="slider"></div>
+                            </label>
+                            <em>Dark Mode</em>
+                        </div>
+                    </li>
+                </ul>
+            </div>
         </div>
-        <div class="wash-result">
-            <div class="talent-display"></div>
-            <div class="talent-display"></div>
-            <div class="talent-display"></div>
-        </div>
-        <div class="record-area">
-            <div class="talent-record"></div>
-            <div class="talent-record"></div>
-            <div class="talent-record"></div>
-        </div>
-        <div class="item-display">
-            <div class="item-count">神兽丹: <span id="item-count">1000</span></div>
-            <div class="adv-item-count">高级神兽丹: <span id="adv-item-count">1000</span></div>
-            <button class="reset-btn">复位</button>
-        </div>
-    </div>
+    </header>
 
-    <div class="overlay">
-        <div class="overlay-text"></div>
-    </div>
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Yelp Database Analysis Project</h1>
+                <p>Comprehensive analysis of user behavior, restaurant characteristics, and platform trends from 2004 to 2017 using SQL, data visualization, and statistical analysis techniques.</p>
+                <a href="#" class="btn">View Project Repository</a>
+            </div>
+        </div>
+    </section>
+
+    <main class="container">
+        <div class="grid">
+            <div class="blog-content">
+                <div class="blog-post" id="overview">
+                    <div class="author-info">
+                        <img src="https://via.placeholder.com/50" alt="Author Avatar">
+                        <div class="author-text">
+                            <span class="author-name">Huang</span>
+                            <span class="post-date">Published on March 31, 2025</span>
+                        </div>
+                    </div>
+                    
+                    <h2>Yelp Database Analysis: Understanding User Behavior and Business Patterns</h2>
+                    
+                    <p>This comprehensive analysis project explores the Yelp database to uncover patterns in user behavior, restaurant performance, and platform growth. The study examines six key tables from the Yelp database (business information, business hours, check-ins, reviews, tips, and user information), covering data from 2004 to 2017.</p>
+                    
+                    <div class="section-highlight">
+                        <p><strong>Project Scope:</strong> Analyzed over 5.2 million reviews, 1.3 million users, and 174,000 businesses to derive actionable insights for users, merchants, and the platform itself.</p>
+                    </div>
+
+                    <h3>Project Objectives</h3>
+                    <p>This analysis was structured to provide insights from three key perspectives:</p>
+                    <ul style="list-style-type: disc; padding-left: 2rem; margin-bottom: 1.5rem;">
+                        <li><strong>Customer Perspective:</strong> Understanding user review patterns, elite user behavior, and rating distributions</li>
+                        <li><strong>Restaurant Perspective:</strong> Analyzing factors that influence restaurant ratings, geographic trends, and operating patterns</li>
+                        <li><strong>Platform Perspective:</strong> Examining user growth, retention rates, and engagement patterns over time</li>
+                    </ul>
+
+                    <div class="data-viz-placeholder">
+                        [User Growth Chart 2004-2017 - Visualization showing the rise and eventual decline of new user registrations]
+                    </div>
+                </div>
+
+                <div class="blog-post" id="methodology">
+                    <h2>Data Methodology and Preparation</h2>
+                    
+                    <p>The analysis utilized a structured SQL-based approach to clean, analyze, and visualize the Yelp dataset. Before beginning the analysis, I performed extensive data cleaning to ensure quality results.</p>
+
+                    <h3>Data Sources</h3>
+                    <p>The dataset included six primary tables from the Yelp database:</p>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Table Name</th>
+                                <th>Description</th>
+                                <th>Records</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>yelp_business</td>
+                                <td>Basic business information</td>
+                                <td>174,567</td>
+                            </tr>
+                            <tr>
+                                <td>yelp_business_hours</td>
+                                <td>Business operating hours</td>
+                                <td>174,567</td>
+                            </tr>
+                            <tr>
+                                <td>yelp_checkin</td>
+                                <td>Check-in information</td>
+                                <td>146,350</td>
+                            </tr>
+                            <tr>
+                                <td>yelp_review</td>
+                                <td>Review information</td>
+                                <td>5,261,668</td>
+                            </tr>
+                            <tr>
+                                <td>yelp_tip</td>
+                                <td>Tip information</td>
+                                <td>1,098,324</td>
+                            </tr>
+                            <tr>
+                                <td>yelp_user</td>
+                                <td>User information</td>
+                                <td>1,326,100</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h3>Data Preparation Process</h3>
+                    <p>The cleaning process involved several key steps:</p>
+                    <ol style="padding-left: 2rem; margin-bottom: 1.5rem;">
+                        <li>Filtering outliers and invalid values from each table</li>
+                        <li>Separating currently open and closed businesses</li>
+                        <li>Removing businesses without operating information</li>
+                        <li>Eliminating records with missing critical data</li>
+                        <li>Creating derived tables for specific analyses</li>
+                    </ol>
+                    
+                    <h3>Example SQL Query</h3>
+                    <div class="code-block">
+                        <pre>
+-- Calculate the count of reviews with 'useful' values greater than 1000,
+-- the average star rating rounded to one decimal place,
+-- and the average length of reviews rounded to the nearest whole number.
+SELECT
+ COUNT(sub.text) as review_count,
+ ROUND(AVG(sub.stars), 1) as avg_stars,
+ ROUND(AVG(sub.len), 0) as avg_length
+FROM (
+ -- Subquery to select relevant data from yelp_review
+ SELECT stars, text, LENGTH(text) as len, useful
+ FROM yelp_review
+ WHERE useful > 1000
+) as sub;</pre>
+                    </div>
+                </div>
+
+                <div class="blog-post" id="findings">
+                    <h2>Key Findings and Insights</h2>
+                    
+                    <h3>1. Customer Perspective Analysis</h3>
+                    
+                    <div class="section-highlight">
+                        <p><strong>Elite vs. Regular Users:</strong> Elite users post approximately 10.2 times more reviews than regular users and receive 3.5-7.8 times more "useful", "funny", and "cool" votes on their reviews.</p>
+                    </div>
+                    
+                    <div class="data-viz-placeholder">
+                        [Elite vs Regular User Engagement Metrics - Visualization showing comparison of review frequency and feedback metrics]
+                    </div>
+                    
+                    <p>Analysis revealed interesting patterns about user engagement and review quality:</p>
+                    <ul style="list-style-type: disc; padding-left: 2rem; margin-bottom: 1.5rem;">
+                        <li>Reviews with more "useful" votes tended to be longer (averaging 1,400-2,200 characters) and gave lower ratings to restaurants (averaging 1.3-2.4 stars)</li>
+                        <li>Negative reviews were more likely to be voted as "useful" compared to positive reviews</li>
+                        <li>The length and star rating of a review had little correlation with whether it was perceived as "funny" or "cool"</li>
+                        <li>Elite users received approximately 22 followers each, compared to less than 1 follower for non-elite users</li>
+                    </ul>
+                    
+                    <h3>2. Restaurant Perspective Analysis</h3>
+                    
+                    <p>Geographical and operational patterns showed clear influence on restaurant success:</p>
+                    
+                    <div class="data-viz-placeholder">
+                        [Restaurant Distribution by State - Map visualization showing concentration in Arizona and Nevada]
+                    </div>
+                    
+                    <ul style="list-style-type: disc; padding-left: 2rem; margin-bottom: 1.5rem;">
+                        <li>Arizona (29.91%) and Nevada (18.95%) account for nearly half of all restaurants in the dataset</li>
+                        <li>Restaurants with higher star ratings tended to operate more days per week, with 5-star restaurants most commonly operating 5-7 days</li>
+                        <li>Closed restaurants had operated fewer days per week (average 3.9 days) and had slightly lower ratings (average 3.51 stars) compared to all restaurants</li>
+                        <li>4.0-star restaurants received the most reviews, despite 5-star restaurants being common (15.78% of all restaurants)</li>
+                    </ul>
+                    
+                    <h3>3. Platform Perspective Analysis</h3>
+                    
+                    <div class="section-highlight">
+                        <p><strong>User Growth Trends:</strong> After peaking in 2014 with 198,976 new users, Yelp saw declining new user registrations, dropping to 77,174 by 2017.</p>
+                    </div>
+                    
+                    <p>Platform usage patterns revealed both strengths and challenges:</p>
+                    <ul style="list-style-type: disc; padding-left: 2rem; margin-bottom: 1.5rem;">
+                        <li>Despite declining new user registrations, review volume continued to increase steadily through 2017</li>
+                        <li>Elite user selection began in 2005 and stabilized at around 4,000 new elite users per year from 2008 onward</li>
+                        <li>Annual user retention rate remained consistent at approximately 30%</li>
+                        <li>Elite users had a dramatically higher retention rate of around 80%</li>
+                        <li>Summer months showed peak user registration and activity</li>
+                    </ul>
+                </div>
+
+                <div class="blog-post" id="recommendations">
+                    <h2>Conclusions and Recommendations</h2>
+                    
+                    <h3>For Users</h3>
+                    <p>To maximize engagement and potentially achieve elite status:</p>
+                    <ul style="list-style-type: disc; padding-left: 2rem; margin-bottom: 1.5rem;">
+                        <li>Focus on writing informative, detailed reviews rather than stylistic ones</li>
+                        <li>Post reviews consistently rather than sporadically</li>
+                        <li>Add photos to reviews, as elite users post significantly more photos</li>
+                        <li>Consider geographical factors, as users in Nevada and Arizona may have higher visibility</li>
+                    </ul>
+                    
+                    <h3>For Restaurant Owners</h3>
+                    <p>To improve ratings and visibility:</p>
+                    <ul style="list-style-type: disc; padding-left: 2rem; margin-bottom: 1.5rem;">
+                        <li>Maintain consistent operating hours, preferably 5+ days per week</li>
+                        <li>Focus particularly on minimizing negative reviews, as they significantly impact overall rating</li>
+                        <li>Consider geographical advantage when opening in states like Arizona and Nevada</li>
+                        <li>Encourage reviews from engaged users who write thoughtful content</li>
+                    </ul>
+                    
+                    <h3>For Platform Development</h3>
+                    <p>To counter declining new user registrations:</p>
+                    <ul style="list-style-type: disc; padding-left: 2rem; margin-bottom: 1.5rem;">
+                        <li>Focus marketing efforts on summer months when user engagement naturally peaks</li>
+                        <li>Consider expanding to more states or international markets</li>
+                        <li>Enhance benefits for elite users to drive aspiration among regular users</li>
+                        <li>Create incentives for regular users to increase retention above the current 30% rate</li>
+                    </ul>
+                </div>
+
+                <div class="blog-post" id="technical-details">
+                    <h2>Technical Implementation Details</h2>
+                    
+                    <p>This project demonstrates several key technical skills in data analysis:</p>
+                    
+                    <h3>SQL Query Optimization</h3>
+                    <p>The analysis required sophisticated SQL queries to process millions of records efficiently. Complex joins, subqueries, and aggregations were optimized for performance.</p>
+                    
+                    <div class="code-block">
+                        <pre>
+-- Calculate the average of 'avg_review_day' values for elite users.
+SELECT AVG(sub.avg_review_day) as avg_review_day_elite
+FROM (
+  -- Subquery to calculate 'avg_review_day' for elite users
+  SELECT
+    user_id,
+    DATEDIFF("2017-12-11", yelping_since) as register_time,
+    (review_count / DATEDIFF("2017-12-11", yelping_since)) as avg_review_day
+  FROM `yelp_user`
+  WHERE elite <> "None"
+) as sub;</pre>
+                    </div>
+                    
+                    <h3>Data Transformation Techniques</h3>
+                    <p>Several transformation techniques were employed:</p>
+                    <ul style="list-style-type: disc; padding-left: 2rem; margin-bottom: 1.5rem;">
+                        <li>Normalization of review counts across time periods</li>
+                        <li>Text analysis for review content length and pattern matching</li>
+                        <li>Temporal analysis of user engagement patterns</li>
+                        <li>Geographic clustering of business performance</li>
+                    </ul>
+                    
+                    <h3>Visualization Approach</h3>
+                    <p>Data visualization was a critical component in conveying the insights from this complex dataset. Techniques included:</p>
+                    <ul style="list-style-type: disc; padding-left: 2rem; margin-bottom: 1.5rem;">
+                        <li>Histograms for distribution analysis</li>
+                        <li>Time series charts for temporal trends</li>
+                        <li>Comparative bar charts for demographic analysis</li>
+                        <li>Pie charts for proportion visualization</li>
+                        <li>Heat maps for geographical distribution</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <aside class="sidebar">
+                <div class="project-nav">
+                    <div class="project-nav-header">
+                        <h3>Project Navigation</h3>
+                    </div>
+                    <div class="project-nav-list">
+                        <div class="section-title">1. Introduction</div>
+                        <ul class="section-items">
+                            <li><a href="#overview">Project Overview</a></li>
+                            <li><a href="#objectives">Objectives</a></li>
+                        </ul>
+                        
+                        <div class="section-title">2. Methodology</div>
+                        <ul class="section-items">
+                            <li><a href="#data-sources">Data Sources</a></li>
+                            <li><a href="#preparation">Data Preparation</a></li>
+                            <li><a href="#cleaning">Data Cleaning</a></li>
+                        </ul>
+                        
+                        <div class="section-title">3. Analysis</div>
+                        <ul class="section-items">
+                            <li><a href="#customer-analysis">Customer Perspective</a></li>
+                            <li><a href="#restaurant-analysis">Restaurant Perspective</a></li>
+                            <li><a href="#platform-analysis">Platform Perspective</a></li>
+                        </ul>
+                        
+                        <div class="section-title">4. Results</div>
+                        <ul class="section-items">
+                            <li><a href="#key-findings">Key Findings</a></li>
+                            <li><a href="#recommendations">Recommendations</a></li>
+                        </ul>
+                        
+                        <div class="section-title">5. Technical Details</div>
+                        <ul class="section-items">
+                            <li><a href="#sql-implementation">SQL Implementation</a></li>
+                            <li><a href="#data-viz">Data Visualization</a></li>
+                            <li><a href="#challenges">Challenges & Solutions</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="sidebar-widget">
+                    <h3>Related Projects</h3>
+                    <div class="project-card">
+                        <div class="card-img">Restaurant Recommendation Engine</div>
+                        <div class="card-content">
+                            <h4 class="card-title">Restaurant Recommendation Engine</h4>
+                            <p class="card-text">Machine learning model to predict user preferences based on review patterns</p>
+                            <a href="#" class="card-link">View Project →</a>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <div class="card-img">Sentiment Analysis of Reviews</div>
+                        <div class="card-content">
+                            <h4 class="card-title">Sentiment Analysis of Reviews</h4>
+                            <p class="card-text">NLP analysis of language patterns in positive and negative reviews</p>
+                            <a href="#" class="card-link">View Project →</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sidebar-widget">
+                    <h3>Topics</h3>
+                    <ul class="category-list">
+                        <li><a href="#">Data Analysis</a></li>
+                        <li><a href="#">SQL</a></li>
+                        <li><a href="#">User Behavior</a></li>
+                        <li><a href="#">Business Intelligence</a></li>
+                        <li><a href="#">Data Visualization</a></li>
+                        <li><a href="#">Platform Analysis</a></li>
+                    </ul>
+                </div>
+                
+                <div class="sidebar-widget">
+                    <h3>Tags</h3>
+                    <div class="tag-cloud">
+                        <a href="#" class="tag">SQL</a>
+                        <a href="#" class="tag">Yelp</a>
+                        <a href="#" class="tag">Data Analysis</a>
+                        <a href="#" class="tag">User Behavior</a>
+                        <a href="#" class="tag">Reviews</a>
+                        <a href="#" class="tag">Restaurants</a>
+                        <a href="#" class="tag">Elite Users</a>
+                        <a href="#" class="tag">Geographic Analysis</a>
+                        <a href="#" class="tag">Platform Growth</a>
+                        <a href="#" class="tag">Retention</a>
+                        <a href="#" class="tag">Data Cleaning</a>
+                        <a href="#" class="tag">Visualization</a>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>About the Author</h3>
+                    <p>Data scientist and analyst specializing in consumer behavior and business intelligence. Passionate about turning complex datasets into actionable insights.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p>Email: contact@example.com</p>
+                    <p>LinkedIn: linkedin.com/in/username</p>
+                    <p>GitHub: github.com/username</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Subscribe</h3>
+                    <p>Get notified about new projects and insights.</p>
+                    <form>
+                        <input type="email" placeholder="Your email" style="padding: 0.5rem; width: 70%; margin-right: 0.5rem;">
+                        <button type="submit" style="padding: 0.5rem; background: var(--primary-color); color: white; border: none; cursor: pointer;">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Data Insights Blog. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 
     <script>
-        // 普通天赋
-        const talents = [
-            {
-                name: '凌波微步（人）',
-                imgUrl: 'https://pic.imgdb.cn/item/6638855f0ea9cb14033e47a7.png'
-            },
-            {
-                name: '凌波微步（宠）',
-                imgUrl: 'https://pic.imgdb.cn/item/663885570ea9cb14033e3831.png'
-            },
-            {
-                "name": "击其要害（人）",
-                "imgUrl": "https://pic.imgdb.cn/item/6638855b0ea9cb14033e3f12.png"
-            },
-            {
-                "name": "击其要害（宠）",
-                "imgUrl": "https://pic.imgdb.cn/item/663885520ea9cb14033e2c9c.png"
-            },
-            {
-                "name": "天神护体（人）",
-                "imgUrl": "https://pic.imgdb.cn/item/663885570ea9cb14033e385e.png"
-            },
-            {
-                "name": "天神护体（宠）",
-                "imgUrl": "https://pic.imgdb.cn/item/663885570ea9cb14033e3878.png"
-            },
-            {
-                "name": "斗转星移（人）",
-                "imgUrl": "https://pic.imgdb.cn/item/6638855b0ea9cb14033e3eda.png"
-            },
-            {
-                "name": "斗转星移（宠）",
-                "imgUrl": "https://pic.imgdb.cn/item/663885520ea9cb14033e2c62.png"
-            },
-            {
-                "name": "清明术（人）",
-                "imgUrl": "https://pic.imgdb.cn/item/6638855f0ea9cb14033e481a.png"
-            },
-            {
-                "name": "清明术（宠）",
-                "imgUrl": "https://pic.imgdb.cn/item/663885570ea9cb14033e3898.png"
-            },
-            {
-                "name": "百步穿杨（人）",
-                "imgUrl": "https://pic.imgdb.cn/item/6638855b0ea9cb14033e3ebd.png"
-            },
-            {
-                "name": "百步穿杨（宠）",
-                "imgUrl": "https://pic.imgdb.cn/item/663888b60ea9cb14034613eb.png"
-            },
-            {
-                "name": "萃金诀（人）",
-                "imgUrl": "https://pic.imgdb.cn/item/6638855f0ea9cb14033e4902.png"
-            },
-            {
-                "name": "萃金诀（宠）",
-                "imgUrl": "https://pic.imgdb.cn/item/663885520ea9cb14033e2c05.png"
-            },
-            {
-                "name": "赤血（人）",
-                "imgUrl": "https://pic.imgdb.cn/item/6638855b0ea9cb14033e3f56.png"
-            },
-            {
-                "name": "赤血（宠）",
-                "imgUrl": "https://pic.imgdb.cn/item/663885520ea9cb14033e2cd3.png"
-            },
-            {
-                "name": "金身不坏（人）",
-                "imgUrl": "https://pic.imgdb.cn/item/6638855b0ea9cb14033e3fa7.png"
-            },
-            {
-                "name": "金身不坏（宠）",
-                "imgUrl": "https://pic.imgdb.cn/item/663885570ea9cb14033e381a.png"
+        // Dark mode toggle functionality
+        const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+        
+        function switchTheme(e) {
+            if (e.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }    
+        }
+        
+        toggleSwitch.addEventListener('change', switchTheme, false);
+        
+        // Check for saved user preference
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            
+            if (currentTheme === 'dark') {
+                toggleSwitch.checked = true;
             }
-            // 其他普通天赋...
-        ];
-
-        // 高级天赋
-        const advTalents = [
-            {
-                name: '高级凌波微步（人）',
-                imgUrl: 'https://pic.imgdb.cn/item/663885470ea9cb14033e126d.png'
-            },
-            {  
-                name: '高级凌波微步（宠）',
-                imgUrl: 'https://pic.imgdb.cn/item/663885410ea9cb14033e0750.png'
-            },
-            {
-                "name": "高级击其要害（人）",
-                "imgUrl": "https://pic.imgdb.cn/item/663885470ea9cb14033e1163.png"
-            },
-            {
-                "name": "高级击其要害（宠）",
-                "imgUrl": "https://pic.imgdb.cn/item/663885390ea9cb14033df664.png"
-            },
-            {
-                "name": "高级天神护体（人）",
-                "imgUrl": "https://pic.imgdb.cn/item/6638854b0ea9cb14033e1a45.png"
-            },
-            {
-                "name": "高级天神护体（宠）",
-                "imgUrl": "https://pic.imgdb.cn/item/663885410ea9cb14033e077d.png"
-            },
-            {
-                "name": "高级斗转星移（人）",
-                "imgUrl": "https://pic.imgdb.cn/item/663885460ea9cb14033e1136.png"
-            },
-            {
-                "name": "高级斗转星移（宠）",
-                "imgUrl": "https://pic.imgdb.cn/item/663885410ea9cb14033e0799.png"
-            },
-            {
-                "name": "高级清明术（人）",
-                "imgUrl": "https://pic.imgdb.cn/item/6638854b0ea9cb14033e1a9a.png"
-            },
-            {
-                "name": "高级清明术（宠）",
-                "imgUrl": "https://pic.imgdb.cn/item/663885410ea9cb14033e0799.png"
-            },
-            {
-                "name": "高级百步穿杨（人）",
-                "imgUrl": "https://pic.imgdb.cn/item/663885410ea9cb14033e07d7.png"
-            },
-            {
-                "name": "高级百步穿杨（宠）",
-                "imgUrl": "https://pic.imgdb.cn/item/663885390ea9cb14033df5aa.png"
-            },
-            {
-                "name": "高级萃金诀（人）",
-                "imgUrl": "https://pic.imgdb.cn/item/6638854b0ea9cb14033e1abe.png"
-            },
-            {
-                "name": "高级萃金诀（宠）",
-                "imgUrl": "https://pic.imgdb.cn/item/663885410ea9cb14033e07b8.png"
-            },
-            {
-                "name": "高级赤血（人）",
-                "imgUrl": "https://pic.imgdb.cn/item/663885470ea9cb14033e1199.png"
-            },
-            {
-                "name": "高级赤血（宠）",
-                "imgUrl": "https://pic.imgdb.cn/item/663885390ea9cb14033df67a.png"
-            },
-            {
-                "name": "高级金身不坏（人）",
-                "imgUrl": "https://pic.imgdb.cn/item/663885470ea9cb14033e121f.png"
-            },
-            {
-                "name": "高级金身不坏（宠）",
-                "imgUrl": "https://pic.imgdb.cn/item/6638853a0ea9cb14033df6a9.png"
-            }
-            // 其他高级天赋...
-        ];
-
-        let itemCount = 1000;
-        let advItemCount = 1000;
-        const itemCountDisplay = document.getElementById('item-count');
-        const advItemCountDisplay = document.getElementById('adv-item-count');
-        const talentDisplays = document.querySelectorAll('.talent-display');
-        const talentRecords = document.querySelectorAll('.talent-record');
-        const overlay = document.querySelector('.overlay');
-        const overlayText = document.querySelector('.overlay-text');
-
-        // 洗练按钮点击事件
-        document.querySelector('.wash-btn').addEventListener('click', function() {
-            if (itemCount < 1) {
-                alert('您已耗尽所有洗练道具,请尝试复位');
-                return;
-            }
-            itemCount--;
-            itemCountDisplay.textContent = itemCount;
-            wash(0.95, 0.05, false);
-        });
-
-        // 高级洗练按钮点击事件  
-        document.querySelector('.adv-wash-btn').addEventListener('click', function() {
-            if (advItemCount < 1) {
-                alert('您已耗尽所有洗练道具,请尝试复位');
-                return;
-            }
-            advItemCount--;
-            advItemCountDisplay.textContent = advItemCount;
-            wash(0.92, 0.08, true);
-        });
-
-        // 洗练函数
-        function wash(talentProb, advTalentProb, isAdvanced) {
-            const results = [];
-            talentDisplays.forEach((display, index) => {
-                let rand = Math.random();
-                if (isAdvanced && index === 0) {
-                    let advIndex = Math.floor(Math.random() * advTalents.length);
-                    display.innerHTML = `<img src="${advTalents[advIndex].imgUrl}" alt="${advTalents[advIndex].name}">`;
-                    results.push(advTalents[advIndex].name);
-                } else if (rand < talentProb) {
-                    let index = Math.floor(Math.random() * talents.length);
-                    display.innerHTML = `<img src="${talents[index].imgUrl}" alt="${talents[index].name}">`;
-                    results.push(talents[index].name);
-                } else {
-                    let index = Math.floor(Math.random() * advTalents.length);
-                    display.innerHTML = `<img src="${advTalents[index].imgUrl}" alt="${advTalents[index].name}">`;
-                    results.push(advTalents[index].name);
+        }
+        
+        // Highlight active section in navigation
+        const sections = document.querySelectorAll('.blog-post');
+        const navItems = document.querySelectorAll('.project-nav-list a');
+        
+        window.addEventListener('scroll', function() {
+            let current = '';
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                
+                if (pageYOffset >= (sectionTop - 200)) {
+                    current = section.getAttribute('id');
                 }
             });
-            const hasDuplicates = checkDuplicates(results);
-            if (hasDuplicates) {
-                recordResults();
-                showOverlay(results);
-            }
-        }
-
-        // 检查是否有重复天赋
-        function checkDuplicates(results) {
-            const uniqueResults = new Set(results);
-            return uniqueResults.size < results.length;
-        }
-
-        // 记录结果
-        function recordResults() {
-            talentRecords.forEach((record, index) => {
-                record.innerHTML = talentDisplays[index].innerHTML;
-            });
-        }
-
-
-        // 显示全屏提示
-        function showOverlay(results) {
-            let message = '';
-            if (results.filter(r => r === '高级凌波微步（人）').length >= 2) {
-                message = '💥💥💥你获得了富可敌国的宝藏！！！';
-            } else if (results.filter(r => r === '高级凌波微步（宠）').length >= 2) {
-                message = '你的宠物即刻化身闪电侠⚡️';
-            } else if (results.filter(r => r === '高级萃金诀（人）').length >= 2) {
-                message = '物理之王，你的力量无人能够匹敌！';
-            } else if (results.filter(r => r === '高级萃金诀（宠）').length >= 2) {
-                message = 'The Greatest Beast Has Born？';
-            } else if (results.filter(r => r === '高级清明术（人）').length >= 2) {
-                message = '魔法！魔法！伟大的魔法！';
-            } else if (results.filter(r => r === '高级清明术（宠）').length >= 2) {
-                message = '绝顶智慧的宠物双高清！！';
-            } else if (results.filter(r => r === '高级天神护体（人）').length >= 2) {
-                message = '金钟罩,铁布衫,都不如天神来护驾！';
-            } else if (results.filter(r => r === '高级天神护体（宠）').length >= 2) {
-                message = '皮糙肉厚才能保护主人！';
-            } else if (results.filter(r => r === '凌波微步（人）').length === 2) {
-                message = '双倍价钱拉5000这真的值得吗~';
-            } else if (results.filter(r => r === '凌波微步（人）').length > 2) {
-                message = '真正的7500诞生了！！！';
-            } else if (results.filter(r => r === '凌波微步（宠）').length === 2) {
-                message = '好消息：双速！坏消息：双低速…';
-            } else if (results.filter(r => r === '凌波微步（宠）').length > 2) {
-                message = '看我爱宠脚下生风~';
-            } else if (results.includes('高级凌波微步（人）') && results.includes('凌波微步（人）')) {
-                message = '如果你在一个大反内洗出来,你就是赢家';
-            } else if (results.includes('高级凌波微步（人）') && results.filter(r => r === '凌波微步（人）').length >= 2) {
-                message = '据我所知,你创造了N1的神话';
-            } else if (results.includes('高级凌波微步（宠）') && results.includes('凌波微步（宠）')) {
-                message = '这样的天赋最适合给白虎！';
-            } else if (results.includes('高级凌波微步（宠）') && results.filter(r => r === '凌波微步（宠）').length >= 2) {
-                message = '这万速,必须是王者宠物的加冕之礼！';
-            } else if (results.includes('高级萃金诀（人）') && results.includes('萃金诀（人）')) {
-                message = '不做最暴力,但要更暴力！';
-            } else if (results.includes('高级清明术（人）') && results.includes('清明术（人）')) {
-                message = '哈利波特骑着扫帚到处飞~';
-            } else if (results.includes('高级萃金诀（宠）') && results.includes('萃金诀（宠）')) {
-                message = '设想一下,一个天赋拉满的20雷蓝猫站在你面前…';
-            } else if (results.includes('高级清明术（宠）') && results.includes('清明术（宠）')) {
-                message = '无极便是道！';
-            } else if (results.includes('高级击其要害（宠）') && results.includes('击其要害（宠）')) {
-                message = '看好了,我的蓝猫一击必杀！';
-            } else if (results.includes('高级击其要害（人）') && results.includes('击其要害（人）')) {
-                message = '天下武功,唯我快、准、狠！';
-            } else if (results.filter(r => r === '天神护体（人）').length >= 2) {
-                message = '天神合体！';
-            } else if (results.filter(r => r === '天神护体（宠）').length >= 2) {
-                message = '我来保护主人！';
-            } else if (results.filter(r => r === '高级百步穿杨（人）').length >= 2) {
-                message = '过气属性收集癖？';
-            } else if (results.filter(r => r === '高级百步穿杨（宠）').length >= 2) {
-                message = '命中高？上古神藤：一叶障目.jpg';
-            } else if (results.filter(r => r === '百步穿杨（人）').length >= 2) {
-                message = '凑数的好运！';
-            } else if (results.filter(r => r === '百步穿杨（宠）').length >= 2) {
-                message = '主人我不想要这个，能洗个高三速给我吗？';
-            } else if (results.filter(r => r === '清明术（人）').length >= 2) {
-                message = '清明时节雨纷纷';
-            } else if (results.filter(r => r === '清明术（宠）').length >= 2) {
-                message = '我是一个合格的法宠了！';
-            } else if (results.filter(r => r === '萃金诀（人）').length >= 2) {
-                message = '撸铁我要撸双倍的，打架我要打一队的';
-            } else if (results.filter(r => r === '萃金诀（宠）').length >= 2) {
-                message = '都闪开，我史努比直接狗叫！';
-            } else if (results.filter(r => r === '高级金身不坏（人）').length >= 2) {
-                message = '千年王八万年龟甲';
-            } else if (results.filter(r => r === '高级金身不坏（宠）').length >= 2) {
-                message = '卡密撒吗，让我为你挡住洪水滔天！！';
-            } else if (results.filter(r => r === '金身不坏（人）').length >= 2) {
-                message = '严丝合缝，谁人有可乘之机？';
-            } else if (results.filter(r => r === '金身不坏（宠）').length >= 2) {
-                message = '我的爱宠感觉更可靠了呢！';
-            } else if (results.filter(r => r === '高级赤血（人）').length >= 2) {
-                message = '感觉好运浪费在没用的属性上了！';
-            } else if (results.filter(r => r === '高级赤血（宠）').length >= 2) {
-                message = '主人，我的评价是不如智慧守护！';
-            } else if (results.filter(r => r === '赤血（人）').length >= 2) {
-                message = '没用的天赋又被你学到了~';
-            } else if (results.filter(r => r === '赤血（宠）').length >= 2) {
-                message = '史上最无用天赋成就达成！';
-            } else if (results.filter(r => r === '击其要害（人）').length >= 2) {
-                message = '有时候，就差这千把暴击扭转战局（跟修真无关）！';
-            } else if (results.filter(r => r === '击其要害（宠）').length >= 2) {
-                message = '你们好，想吃我一个百分百暴击的狗叫吗！';
-            } else if (results.filter(r => r === '高级斗转星移（人）').length >= 2) {
-                message = '游走江湖，一要站得住，二要溜得快！';
-            } else if (results.filter(r => r === '高级斗转星移（宠）').length >= 2) {
-                message = '从今天起，请叫我的爱宠闪电侠！';
-            } else if (results.filter(r => r === '斗转星移（人）').length >= 2) {
-                message = '只要我闪得越快，你的战意就跟不上我的节奏！';
-            } else if (results.filter(r => r === '斗转星移（宠）').length >= 2) {
-                message = '小心地（de）滑';
-            } else {
-                message = '好像出货了,已自动为你记录';
-            }
-            overlayText.textContent = message;
-            overlay.classList.add('active');
-            setTimeout(() => {
-                overlay.classList.remove('active');
-            }, 1000);
-        }
-
-        // 记录按钮点击事件
-        document.querySelector('.record-btn').addEventListener('click', recordResults);
-
-        // 复位按钮点击事件
-        document.querySelector('.reset-btn').addEventListener('click', function() {
-            itemCount = 1000;
-            advItemCount = 1000;
-            itemCountDisplay.textContent = itemCount;
-            advItemCountDisplay.textContent = advItemCount;
-            talentDisplays.forEach(display => {
-                display.innerHTML = '';
-            });
-            talentRecords.forEach(record => {
-                record.innerHTML = '';
+            
+            navItems.forEach(item => {
+                item.classList.remove('active-section');
+                if (item.getAttribute('href').substring(1) === current) {
+                    item.classList.add('active-section');
+                }
             });
         });
-
-        // 预加载图片函数
-        function preloadImages(urls) {
-            urls.forEach(url => {
-                const img = new Image();
-                img.src = url; 
+        
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
             });
-        }
-
-        // 调用预加载函数
-        const allImgUrls = talents.concat(advTalents).map(talent => talent.imgUrl);
-        preloadImages(allImgUrls);
+        });
     </script>
 </body>
 </html>
